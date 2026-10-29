@@ -13,10 +13,10 @@ checkpoints/
 # Virtual environments
 venv/
 env/
-.env
 
 # OS & Editor files
 .DS_Store
 Thumbs.db
-.vscode/
 .idea/
+config.bat
+node_modules
