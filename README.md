@@ -47,6 +47,31 @@ Facade-Renderer/
    pip install -r requirements.txt
    ```
 
+3. **Download Pretrained Model (Optional):**
+   If you want to skip training and test immediately, download `generator_latest.pth` from the **[v1.0 - Facade Renderer Release](../../releases/tag/v1.0)** and place it into:
+   ```text
+   outputs/checkpoints/generator_latest.pth
+   ```
+
+---
+
+## Pretrained Model Weights (Release v1.0)
+
+A fully trained PyTorch checkpoint is available in the **[v1.0 - Facade Renderer Release](../../releases/tag/v1.0)**:
+* **Asset:** `generator_latest.pth` (~217 MB)
+* **Architecture:** U-Net 256 Generator with skip connections
+* **Training Details:** 200 epochs on the CMP Facades dataset with Adam ($\beta_1=0.5, \beta_2=0.999$, $\text{lr}=0.0002$) and $\mathcal{L}_{\text{cGAN}} + 100 \cdot \mathcal{L}_{L1}$ loss.
+
+To use the release weights:
+```bash
+# Ensure target folder exists
+mkdir -p outputs/checkpoints
+
+# Move downloaded generator_latest.pth into outputs/checkpoints/
+# Then run the dashboard or test evaluation immediately
+python dashboard.py
+```
+
 ---
 
 ## Dataset Setup
