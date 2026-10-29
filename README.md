@@ -21,6 +21,8 @@ The model is trained to generate the *correct* building for each input layout, p
 
 ```text
 Facade-Renderer/
+├── train_facade_renderer.ipynb # Standalone Jupyter Notebook ready for Kaggle GPU
+├── dashboard.py        # Interactive Web Dashboard for testing and inference
 ├── dataset.py          # CMP Facades dataset, slicing, augmentation & DataLoader
 ├── models.py           # U-Net 256 Generator & 70x70 PatchGAN Discriminator
 ├── train.py            # Training loop, loss computation, visual logging & checkpointing
@@ -137,7 +139,42 @@ Key arguments:
 Visual samples will be automatically saved to `outputs/samples/sample_epoch_XXX.png` showing:
 `[ Condition Blueprint | Ground Truth | Generated Building ]`.
 
-### Evaluation & Inference
+### Training on Kaggle (Jupyter Notebook)
+
+A completely self-contained notebook is provided: [`train_facade_renderer.ipynb`](file:///D:/VSCodeProjects/Facade-Renderer/train_facade_renderer.ipynb).
+
+1. Upload `train_facade_renderer.ipynb` to [Kaggle](https://www.kaggle.com/code).
+2. Attach dataset `vikramtiwari/pix2pix-dataset` under **Input** (or let the notebook automatically download it).
+3. Under **Notebook options**, select **Accelerator: GPU P100** or **GPU T4**.
+4. Click **Run All**. The notebook:
+   - Detects GPU acceleration.
+   - Loads the CMP Facades dataset.
+   - Shows inline visual comparison plots every 10 epochs.
+   - Plots adversarial and L1 loss curves.
+   - Saves final checkpoints into `/kaggle/working/checkpoints/` for direct download.
+
+---
+
+### Interactive Web Dashboard (`dashboard.py`)
+
+For intuitive testing, evaluation, and interactive visual demonstration, launch the included dashboard:
+
+```bash
+python dashboard.py
+```
+
+Then navigate to `http://127.0.0.1:5000` in your web browser.
+
+**Dashboard Features:**
+- **Model Selector:** Auto-detects checkpoints in `outputs/checkpoints/` or accepts custom `.pth` paths.
+- **Test Set Gallery:** Browse and select any sample from the 106 test facade pairs with instant side-by-side display of the input blueprint, real ground truth, and generated facade.
+- **Custom Upload:** Drag and drop any custom blueprint, architectural layout, or mask.
+- **Quantitative Metrics:** Live readout of inference latency (ms), L1 MAE error, and PSNR (dB).
+- **One-Click Download:** Save the synthesized façade image directly.
+
+---
+
+### CLI Evaluation & Inference
 
 Evaluate on the test set:
 ```bash
