@@ -5,6 +5,7 @@ Powered by Flask (zero extra heavy dependencies needed).
 """
 
 import os
+import re
 import io
 import time
 import glob
@@ -29,6 +30,11 @@ CURRENT_MODEL: Optional[UNetGenerator] = None
 CURRENT_CHECKPOINT_PATH: Optional[str] = None
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 FACADES_DIR = find_facades_dir() or r"D:\Datasets\facades"
+
+
+def natural_sort_key(s: str):
+    """Sort strings containing numbers in natural numeric order (e.g. 1.jpg, 2.jpg ... 10.jpg)."""
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
 
 def load_generator(checkpoint_path: str) -> UNetGenerator:
@@ -362,7 +368,7 @@ HTML_TEMPLATE = """
       <span class="badge" id="deviceBadge">Device: {{ device }}</span>
     </div>
     <div>
-      <a href="https://github.com/vikramtiwari/pix2pix-dataset" target="_blank" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">CMP Facades Dataset ↗</a>
+      <a href="https://www.kaggle.com/datasets/vikramtiwari/pix2pix-dataset" target="_blank" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">CMP Facades Dataset ↗</a>
     </div>
   </header>
 
@@ -640,16 +646,19 @@ HTML_TEMPLATE = """
 @app.route("/")
 def index():
     # Discover available checkpoints
-    checkpoints = glob.glob("outputs/checkpoints/*.pth") + glob.glob("checkpoints/*.pth")
+    checkpoints = sorted(
+        list(set(glob.glob("outputs/checkpoints/*.pth") + glob.glob("checkpoints/*.pth"))),
+        key=natural_sort_key,
+    )
     if not checkpoints:
         checkpoints = ["outputs/checkpoints/generator_latest.pth"]
 
-    # Discover test samples
+    # Discover test samples in natural numeric order (1.jpg, 2.jpg ... 106.jpg)
     test_dir = os.path.join(FACADES_DIR, "test")
     test_samples = []
     if os.path.exists(test_dir):
         files = glob.glob(os.path.join(test_dir, "*.jpg")) + glob.glob(os.path.join(test_dir, "*.png"))
-        test_samples = [os.path.basename(f) for f in sorted(files)]
+        test_samples = sorted([os.path.basename(f) for f in files], key=natural_sort_key)
 
     return render_template_string(
         HTML_TEMPLATE,

@@ -4,6 +4,7 @@ Handles paired CMP Facades images (blueprint/segmentation map -> photo).
 """
 
 import os
+import re
 import glob
 import random
 from typing import Tuple, Optional
@@ -13,6 +14,11 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
+
+
+def natural_sort_key(s: str):
+    """Sort strings containing numbers in natural numeric order (1, 2, ... 10, 106)."""
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
 
 def find_facades_dir(base_hint: Optional[str] = None) -> Optional[str]:
@@ -80,15 +86,16 @@ class FacadesDataset(Dataset):
         # Resolve directory: check root_dir/split or root_dir directly
         split_dir = os.path.join(root_dir, split)
         if os.path.exists(split_dir):
-            self.image_paths = sorted(
+            files = (
                 glob.glob(os.path.join(split_dir, "*.jpg")) +
                 glob.glob(os.path.join(split_dir, "*.png"))
             )
         else:
-            self.image_paths = sorted(
+            files = (
                 glob.glob(os.path.join(root_dir, "*.jpg")) +
                 glob.glob(os.path.join(root_dir, "*.png"))
             )
+        self.image_paths = sorted(files, key=natural_sort_key)
 
         if len(self.image_paths) == 0:
             raise FileNotFoundError(
